@@ -50,9 +50,19 @@ class Transaction
         return base64_decode($this->signature);
     }
 
+    public function getSignatureBase64()
+    {
+        return $this->signature;
+    }
+
     public function setSignature($signature)
     {
         $this->signature = base64_encode($signature);
+    }
+
+    public function setSignatureBase64($signature)
+    {
+        $this->signature = strval($signature);
     }
 
     public function getTime()
@@ -71,7 +81,7 @@ class Transaction
             throw new Exception("All fields must be filled");
         }
 
-        return $this->id = hash('sha256', sprintf(
+        $this->id = hash('sha256', sprintf(
                 '%s %s %1.5F %d',
                 $this->from,
                 $this->to,
@@ -122,12 +132,13 @@ class Transaction
     public function __toString()
     {
         if ($this->isValid()) {
+            //beware to use json in other languages (e.g. python). Fields can be reordered.
             return base64_encode(json_encode([
                 'id' => $this->getId(),
                 'from' => $this->getFrom(),
                 'to' => $this->getTo(),
                 'amount' => $this->getAmount(),
-                'signature' => $this->getSignature(),
+                'signature' => $this->getSignatureBase64(), //json_encode won't work with binary string, so use base64 encoded
                 'time' => $this->getTime(),
             ]));
         } else {
@@ -147,7 +158,7 @@ class Transaction
         $transaction->setFrom($data['from']);
         $transaction->setTo($data['to']);
         $transaction->setAmount($data['amount']);
-        $transaction->setSignature($data['signature']);
+        $transaction->setSignatureBase64($data['signature']);
         $transaction->setTime($data['time']);
 
         $transaction->generateId();

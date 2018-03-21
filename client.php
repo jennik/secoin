@@ -58,7 +58,7 @@ function pay($to, $amount)
 
     if ($transaction->isValid()) {
         echo "Transaction {$transaction->getId()} is created\n";
-        // save to db
+        Repository::getInstance()->addTransaction($transaction);
         // send to others
     } else {
         echo "Can't validate created transaction";
